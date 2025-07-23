@@ -6,6 +6,5 @@ router = APIRouter()
 def test():
     return {"hello": "world"}
 
-@router.get("/test")
-def other_test():
-    return {"world": "hello"}
+# TODO
+# Create endpoints for every function in app.logic
