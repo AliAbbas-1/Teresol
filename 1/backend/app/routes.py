@@ -20,12 +20,5 @@ def get_record_from_symbol(symbol: str):
     except KeyError:
         return {"error": f"Symbol '{symbol}' not found"}
 
-@router.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
-    upload = await file.read()
-    df_new = pd.read_csv(io.BytesIO(upload))
-    set_df_file(df_new)
-    return {"status": "success"}
-
 # TODO
 # Create endpoints for every function in app.logic
