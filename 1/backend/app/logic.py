@@ -6,8 +6,6 @@ df_files_list : Dict[str, pd.DataFrame] = {}
 
 def df_meta_init(df: pd.DataFrame) -> pd.DataFrame:
     df = df[["Symbol", "Security Name", "ETF", "Listing Exchange", "Market Category", "Round Lot Size"]].copy()
-    
-    df["Listing Exchange"] = df["Listing Exchange"].fillna("Missing")
     df["Market Category"] = df["Market Category"].fillna("Missing")
 
     df.set_index("Symbol", inplace=True)

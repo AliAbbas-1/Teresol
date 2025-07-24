@@ -8,7 +8,7 @@ def get_all_symbols():
     return get_meta_info().to_dict(orient="records")
 
 @router.get("/stocks/unique")
-def get_all_symbols():
+def get_unique_symbols():
     return {
         "unique_records": len(get_meta_info().to_dict(orient="records"))
     }
@@ -29,7 +29,7 @@ def get_record_from_symbol(symbol: str):
     
     except FileNotFoundError:
         print("file")
-        return {"error": f"Symbol '{symbol}' not found"}
+        return {"error": f"Data file for symbol '{symbol}' not found"}
 
 @router.get("/distribution/etf")
 def get_distribution_etf():
