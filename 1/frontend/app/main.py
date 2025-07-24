@@ -26,6 +26,7 @@ st.title("Hello")
 
 upload_csv = st.file_uploader("Upload your CSV file", type=["csv"])
 if upload_csv is not None:
+    upload_csv.seek(0)
     files = {
         'file': (upload_csv.name, upload_csv, 'text/csv')
     }
