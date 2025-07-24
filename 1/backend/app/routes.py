@@ -1,35 +1,83 @@
+from datetime import datetime
+from functools import wraps
 from fastapi import APIRouter
-from app.logic import get_meta_info, get_calculation_data, get_file_info
+from fastapi.responses import JSONResponse
+from app.logic import get_meta_info, get_calculation_data, get_file_data
 
 router = APIRouter()
 
-@router.get("/stocks")
-def get_all_symbols():
-    return get_meta_info().to_dict(orient="records")
+def safe_symbol_access(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        symbol = kwargs.get("symbol", "").upper()
+        kwargs["symbol"] = symbol
+        try:
+            return func(*args, **kwargs)
+        except KeyError:
+            return JSONResponse(status_code=404, content={"error": f"Symbol '{symbol}' not found"})
+        except FileNotFoundError:
+            return JSONResponse(status_code=404, content={"error": f"Data file for symbol '{symbol}' not found"})
+    return wrapper
 
-@router.get("/stocks/unique")
-def get_unique_symbols():
+@router.get("/stocks")
+@safe_symbol_access
+def get_stocks():
+    df = get_meta_info().copy()
+    df["Symbol"] = df.index
+
+    cols = df.columns.tolist()
+    cols = ["Symbol"] + [col for col in cols if col != "Symbol"]    
+    df = df[cols]
+
+    return df.to_dict(orient="records")
+
+@router.get("/stocks/unique")   
+def get_stocks_unique():
     return {
         "unique_records": len(get_meta_info().to_dict(orient="records"))
     }
 
 @router.get("/stocks/{symbol}")
-def get_record_from_symbol(symbol: str):
+@safe_symbol_access
+def get_stocks_symbol(symbol: str):
     symbol = symbol.upper()
 
-    try:
-        df = get_meta_info()
-        return {
-            "meta": df.loc[symbol].to_dict(),
-            "calc": get_calculation_data(get_file_info(symbol))
-        }
-    except KeyError:
-        print("symbol")
-        return {"error": f"Symbol '{symbol}' not found"}
+    df_meta = get_meta_info()
+    return df_meta.loc[symbol].to_dict()
     
-    except FileNotFoundError:
-        print("file")
-        return {"error": f"Data file for symbol '{symbol}' not found"}
+@router.get("/stocks/{symbol}/data")
+@safe_symbol_access
+def get_stocks_symbol_data(symbol: str):
+    symbol = symbol.upper()
+
+    df = get_file_data(symbol).copy()
+
+    df["Date"] = df.index
+
+    cols = df.columns.tolist()
+    cols = ["Date"] + [col for col in cols if col != "Date"]    
+    df = df[cols]
+
+    return df.to_dict(orient="records")
+    
+@router.get("/stocks/{symbol}/data/{date}")
+@safe_symbol_access
+def get_stocks_symbol_data_date(symbol: str, date: datetime):
+    symbol = symbol.upper()
+    
+    df_file = get_file_data(symbol)
+
+    try:
+        return df_file.loc[date].to_dict()
+    except KeyError:
+        return JSONResponse(status_code=404, content={"error": f"Date '{date.date()}' not found for symbol '{symbol}'"})
+
+@router.get("/stocks/{symbol}/analytics")
+@safe_symbol_access
+def get_stocks_symbol_analytics(symbol: str):
+    symbol = symbol.upper()
+
+    return get_calculation_data(get_file_data(symbol))
 
 @router.get("/distribution/etf")
 def get_distribution_etf():
@@ -45,6 +93,3 @@ def get_distribution_exchanges():
 def get_distribution_categories():
     df = get_meta_info()
     return df["Market Category"].value_counts().to_dict()
-
-# TODO
-# Create endpoints for every function in app.logic

@@ -9,17 +9,15 @@ def df_meta_init(df: pd.DataFrame) -> pd.DataFrame:
     df["Market Category"] = df["Market Category"].fillna("Missing")
 
     df.set_index("Symbol", inplace=True)
-    df["Symbol"] = df.index
-
-    cols = df.columns.tolist()
-    cols = ["Symbol"] + [col for col in cols if col != "Symbol"]    
-    df = df[cols]
 
     return df
 
 def df_file_init(df: pd.DataFrame) -> pd.DataFrame:
     df.dropna(inplace=True)
     df["Date"] = pd.to_datetime(df["Date"])
+
+    df.set_index("Date", inplace=True)
+
     return df
 
 df_meta = df_meta_init(pd.read_csv("app/.data/symbols_valid_meta.csv", na_values=[" "]))
@@ -28,7 +26,7 @@ def get_meta_info():
     global df_meta
     return df_meta
 
-def get_file_info(symbol: str):
+def get_file_data(symbol: str):
     path = Path(f"app/.data/stocks/{symbol}.csv")
 
     if not path.exists():
