@@ -13,17 +13,25 @@ def df_file_init(df: pd.DataFrame) -> pd.DataFrame:
     df.sort_index(inplace=True)
     return df
 
-def get_all_metadata():
+def get_meta_file():
     return df_meta
 
-# def get_distribution_data(df: pd.DataFrame) [return dictionary] :
+def get_file():
+    return df_file
 
-#     object["Daily Value Return"] = [...]
-#     object[]
-#     object[]
-#     object[]
+def get_distribution_data(df: pd.DataFrame):
 
-#     return object
+    result={}
+
+    df['Daily return'] = df["Close"].pct_change()
+
+    result["Avg Daily Return"]=df["Daily return"].mean()
+    result["volatility"]=df["Daily return"].std()
+    result["Sharp Ratio"]= result["Avg Daily Return"]/result["volatility"]
+    result["var 95%"]= result["Avg Daily Return"]-1.65 * result["volatility"]
+
+    print(result)
+    return result
 
 def set_df_file(df_new: pd.DataFrame):
     global df_file
