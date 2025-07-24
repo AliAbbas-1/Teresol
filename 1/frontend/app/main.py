@@ -1,11 +1,9 @@
 import streamlit as st
 import requests
 
-# Initialize theme in session state if not already set
 if 'theme' not in st.session_state:
-    st.session_state.theme = 'light' # Default theme
+    st.session_state.theme = 'light'
 
-# Function to toggle the theme
 def toggle_theme():
     if st.session_state.theme == 'light':
         st.session_state.theme = 'dark'
@@ -13,17 +11,27 @@ def toggle_theme():
     else:
         st.session_state.theme = 'light'
         st._config.set_option('theme.base', 'light')
-    st.rerun() # Rerun the app to apply the theme change
+    st.rerun() 
 
-# Add a toggle button for the theme
-# You can place this wherever you want your toggle to appear
 st.sidebar.button(
     "Toggle Theme: " + ("☀️ Light" if st.session_state.theme == 'light' else "🌙 Dark"),
     on_click=toggle_theme
 )
 
 st.title("Hello")
-res = requests.get("http://localhost:8000/")
-res.raise_for_status()
 
-st.json(res.json())
+# res = requests.get("http://localhost:8000/")
+# res.raise_for_status()
+# st.json(res.json())
+
+upload_csv = st.file_uploader("Upload your CSV file", type=["csv"])
+if upload_csv is not None:
+    files = {
+        'file': (upload_csv.name, upload_csv, 'text/csv')
+    }
+    response = requests.post("http://localhost:8000/upload", files=files)
+    if response.status_code == 200:
+        st.success("Success")
+        st.json(response.json())
+    else:
+        st.error("Failure")
