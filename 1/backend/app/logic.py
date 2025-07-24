@@ -1,42 +1,67 @@
+from pathlib import Path
 import pandas as pd
+from typing import Dict
+
+df_files_list : Dict[str, pd.DataFrame] = {}
 
 def df_meta_init(df: pd.DataFrame) -> pd.DataFrame:
-    df = df[["Symbol", "Security Name", "ETF", "Listing Exchange", "Market Category"]]
-    df = df.dropna(subset=["Listing Exchange", "Market Category"])
-    df.set_index(df["Symbol"].str.upper(), inplace=True)
+    df = df[["Symbol", "Security Name", "ETF", "Listing Exchange", "Market Category", "Round Lot Size"]].copy()
+    
+    df["Listing Exchange"] = df["Listing Exchange"].fillna("Missing")
+    df["Market Category"] = df["Market Category"].fillna("Missing")
+
+    df.set_index("Symbol", inplace=True)
+    df["Symbol"] = df.index
+
+    cols = df.columns.tolist()
+    cols = ["Symbol"] + [col for col in cols if col != "Symbol"]    
+    df = df[cols]
+
     return df
 
 def df_file_init(df: pd.DataFrame) -> pd.DataFrame:
     df.dropna(inplace=True)
     df["Date"] = pd.to_datetime(df["Date"])
-    df.set_index("Date", inplace=True)
-    df.sort_index(inplace=True)
     return df
 
-def get_meta_file():
+df_meta = df_meta_init(pd.read_csv("app/.data/symbols_valid_meta.csv", na_values=[" "]))
+
+def get_meta_info():
+    global df_meta
     return df_meta
 
-def get_file():
-    return df_file
+def get_file_info(symbol: str):
+    path = Path(f"app/.data/stocks/{symbol}.csv")
 
-def get_distribution_data(df: pd.DataFrame):
+    if not path.exists():
+        raise FileNotFoundError(f"File does not exist: {path}")
 
-    result={}
+    df = pd.read_csv(path, na_values=[" "])
+    df_files_list[symbol] = df_file_init(df)
+    return df_files_list[symbol]
 
+def get_calculation_data(df: pd.DataFrame) -> dict:
+    df = df.copy()
     df['Daily return'] = df["Close"].pct_change()
 
-    result["Avg Daily Return"]=df["Daily return"].mean()
-    result["volatility"]=df["Daily return"].std()
-    result["Sharp Ratio"]= result["Avg Daily Return"]/result["volatility"]
-    result["var 95%"]= result["Avg Daily Return"]-1.65 * result["volatility"]
+    avg_return = df["Daily return"].mean()
+    volatility = df["Daily return"].std()
 
-    print(result)
-    return result
+    if volatility == 0 or pd.isna(volatility):
+        sharpe = float('nan')
+    else:
+        sharpe = avg_return / volatility
+
+    var_95 = avg_return - 1.65 * volatility
+
+    return {
+        "Average Daily Return": avg_return,
+        "Volatility": volatility,
+        "Sharpe Ratio": sharpe,
+        "Value At Risk 95%": var_95
+    }
+
 
 def set_df_file(df_new: pd.DataFrame):
     global df_file
     df_file = df_file_init(df_new)
-
-
-df_meta = df_meta_init(pd.read_csv("app/data/symbols_valid_meta.csv", na_values=[" "]))
-df_file = df_file_init(pd.read_csv("app/data/A.csv", na_values=[" "])) # default
