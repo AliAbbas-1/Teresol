@@ -65,3 +65,4 @@ with tabs[2]:
     plot_distribution("/distribution/etf", "ETF Distribution", col1)
     plot_distribution("/distribution/exchanges", "Exchange Distribution", col2)
     plot_distribution("/distribution/categories", "Category Distribution", col3)
+###done
