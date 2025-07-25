@@ -1,7 +1,7 @@
 from datetime import datetime
 from functools import wraps
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from app.logic import get_meta_info, get_calculation_data, get_file_data
 
 router = APIRouter()
@@ -18,6 +18,10 @@ def safe_symbol_access(func):
         except FileNotFoundError:
             return JSONResponse(status_code=404, content={"error": f"Data file for symbol '{symbol}' not found"})
     return wrapper
+
+@router.get("/favicon.ico")
+def get_favicon():
+    return RedirectResponse(url="/static/favicon.ico")
 
 @router.get("/stocks")
 def get_stocks():
