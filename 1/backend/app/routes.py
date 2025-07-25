@@ -3,6 +3,7 @@ from functools import wraps
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse, RedirectResponse
 from app.logic import get_meta_info, get_calculation_data, get_file_data
+from app.logic import train_and_predict
 
 router = APIRouter()
 
@@ -91,6 +92,14 @@ def get_distribution_etf():
 def get_distribution_exchanges():
     df = get_meta_info()
     return df["Listing Exchange"].value_counts().to_dict()
+
+
+@router.get("/stocks/{symbol}/predict")
+def predict_stock_price(symbol: str ):
+    df=get_file_data(symbol).copy()
+    df['Date']= df.index
+    return train_and_predict(df)
+
 
 @router.get("/distribution/categories")
 def get_distribution_categories():

@@ -18,26 +18,31 @@ section = st.sidebar.radio("Select View", ["Market Overview", "Stock Explorer", 
 if section == "Market Overview":
     st.title("NASDAQ Market Overview")
 
-    col1, col2, col3 = st.columns(3)
+    # ROW 1: Market Category (Pie) and ETF Distribution (Pie) side-by-side
+    col1_row1, col2_row1 = st.columns(2) # Two columns for these two charts
 
-    # Distribution by exchange
-    exchanges = requests.get(f"{API_BASE}/distribution/exchanges").json()
-    fig_exchange = px.bar(x=list(exchanges.keys()), y=list(exchanges.values()), 
-                          labels={"x": "Exchange", "y": "Count"}, title="Stocks per Exchange")
-    col1.plotly_chart(fig_exchange, use_container_width=True)
-
-    # Market category
+    # Market category (Pie Chart) - in col1_row1
     categories = requests.get(f"{API_BASE}/distribution/categories").json()
-    fig_cat = px.pie(names=list(categories.keys()), values=list(categories.values()), 
+    fig_cat = px.pie(names=list(categories.keys()), values=list(categories.values()),
                      title="Market Category Distribution")
-    col2.plotly_chart(fig_cat, use_container_width=True)
+    col1_row1.plotly_chart(fig_cat, use_container_width=True)
 
-    # ETF distribution
+    # ETF distribution (Pie Chart - kept as pie chart) - in col2_row1
     etf_dist = requests.get(f"{API_BASE}/distribution/etf").json()
-    fig_etf = px.pie(names=["Non-ETFs", "ETFs"], values = [etf_dist.get("N", 0), etf_dist.get("Y", 0)],
+    fig_etf_pie = px.pie(names=["Non-ETFs", "ETFs"], values = [etf_dist.get("N", 0), etf_dist.get("Y", 0)],
                      title="ETF vs Non-ETF")
-    col3.plotly_chart(fig_etf, use_container_width=True)
+    col2_row1.plotly_chart(fig_etf_pie, use_container_width=True) # Use the original pie chart figure
 
+
+    # ROW 2: Stocks per Exchange (Bar) - on a new line below
+    st.markdown("---") # Optional: Add a separator
+    st.subheader("Stocks per Exchange Distribution") # Optional: New subheader for clarity
+
+    # Distribution by exchange (Bar Graph) - this will automatically go to a new line
+    exchanges = requests.get(f"{API_BASE}/distribution/exchanges").json()
+    fig_exchange = px.bar(x=list(exchanges.keys()), y=list(exchanges.values()),
+                          labels={"x": "Exchange", "y": "Count"}, title="Stocks per Exchange")
+    st.plotly_chart(fig_exchange, use_container_width=True) # Directly use st.plotly_chart
 
 
 # ---------- PAGE 2: STOCK EXPLORER ----------
