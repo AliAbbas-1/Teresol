@@ -20,7 +20,6 @@ def safe_symbol_access(func):
     return wrapper
 
 @router.get("/stocks")
-@safe_symbol_access
 def get_stocks():
     df = get_meta_info().copy()
     df["Symbol"] = df.index
