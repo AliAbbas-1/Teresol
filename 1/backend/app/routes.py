@@ -83,6 +83,12 @@ def get_stocks_symbol_analytics(symbol: str):
 
     return get_calculation_data(get_file_data(symbol))
 
+@router.get("/stocks/{symbol}/predict")
+def predict_stock_price(symbol: str):
+    df = get_file_data(symbol).copy()
+    df['Date'] = df.index
+    return train_and_predict(df)
+
 @router.get("/distribution/etf")
 def get_distribution_etf():
     df = get_meta_info()
@@ -93,15 +99,6 @@ def get_distribution_exchanges():
     df = get_meta_info()
 
     return df["Listing Exchange"].value_counts().to_dict()
-
-#future price predict of 10 days
-
-@router.get("/stocks/{symbol}/predict")
-def predict_stock_price(symbol: str ):
-    df=get_file_data(symbol).copy()
-    df['Date']= df.index
-    return train_and_predict(df)
-
 
 @router.get("/distribution/categories")
 def get_distribution_categories():
