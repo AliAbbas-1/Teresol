@@ -5,6 +5,7 @@ import plotly.express as px
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+
 st.set_page_config(layout="wide", page_title="NASDAQ Dashboard")
 
 API_BASE = "http://localhost:8000"
