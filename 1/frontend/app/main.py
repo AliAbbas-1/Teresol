@@ -69,13 +69,17 @@ elif main_section == "Meta Visualization":
     st.title("Meta Visualization")
     df = get_all_stocks()
     st.subheader("Stocks per Listing Exchange")
-    st.plotly_chart(
-        px.bar(
-            x=df["Listing Exchange"].value_counts().index,
-            y=df["Listing Exchange"].value_counts().values
-        ),
-        use_container_width=True
+
+    fig = px.bar(
+        x=df["Listing Exchange"].value_counts().index,
+        y=df["Listing Exchange"].value_counts().values
     )
+    fig.update_layout(
+        xaxis_title="Listing Exchange",
+        yaxis_title="Stocks"
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
     st.subheader("Market Category Distribution")
     cat = get_categories_dist()
     st.plotly_chart(
@@ -149,9 +153,14 @@ elif main_section == "Stock Price Data" and data_page:
         st.write(data.describe())
 
     elif data_page == "Daily Returns":
-        st.subheader(" Daily Returns")
+        st.subheader("Daily Returns")
         data["Daily Return"] = data["Close"].pct_change()
-        st.line_chart(data["Daily Return"].dropna())
+        # st.line_chart(data["Daily Return"].dropna())
+        df = data["Daily Return"].dropna().reset_index()
+        df.columns = ["Date", "Daily Return"]
+        fig = px.line(df, x="Date", y="Daily Return", 
+                    labels={"Date": "", "Daily Return": "Daily Return"})
+        st.plotly_chart(fig, use_container_width=True)
 
 # --- Stock Visualization Subpages ---
 elif main_section == "Stock Visualization" and viz_page:
@@ -167,15 +176,33 @@ elif main_section == "Stock Visualization" and viz_page:
     # Conditional Visualization Content
     if viz_page == "Price Over Time":
         st.subheader(" Price Over Time")
-        st.line_chart(data["Close"])
+        df = data["Close"].dropna().reset_index()
+        df.columns = ["Date", "Close"]
+        fig = px.line(df, x="Date", y="Close",
+                    labels={"Date": "", "Close": "Close"})
+        st.plotly_chart(fig, use_container_width=True)
 
     elif viz_page == "Moving Averages":
         st.subheader(" Moving Averages")
         data["SMA20"] = data["Close"].rolling(20).mean()
         data["SMA50"] = data["Close"].rolling(50).mean()
-        st.plotly_chart(px.line(data, y=["Close", "SMA20", "SMA50"]), use_container_width=True)
+
+        fig = px.line(data, y=["Close", "SMA20", "SMA50"])
+
+        fig.update_layout(
+            xaxis_title="",
+            yaxis_title="Averages"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
 
     elif viz_page == "Volatility":
         st.subheader(" Volatility (Rolling Std Dev)")
         data["Volatility"] = data["Close"].pct_change().rolling(20).std()
-        st.plotly_chart(px.line(data, y="Volatility"), use_container_width=True)
+
+        fig = px.line(data, y="Volatility")
+        fig.update_layout(xaxis_title="")
+
+        st.plotly_chart(fig, use_container_width=True)
+
