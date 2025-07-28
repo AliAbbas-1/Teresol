@@ -91,8 +91,10 @@ def get_distribution_etf():
 @router.get("/distribution/exchanges")
 def get_distribution_exchanges():
     df = get_meta_info()
+
     return df["Listing Exchange"].value_counts().to_dict()
 
+#future price predict of 10 days
 
 @router.get("/stocks/{symbol}/predict")
 def predict_stock_price(symbol: str ):
