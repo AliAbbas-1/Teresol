@@ -143,7 +143,7 @@ elif main_section == "Stock Price Data" and data_page:
     st.subheader(" Meta Info")
     st.json(get_stock_metadata(symbol))
 
-    # --- Conditional Subpage Content ---
+    # Conditional Subpage Content
     if data_page == "Summary Stats":
         st.subheader(" Summary Statistics")
         st.write(data.describe())
@@ -164,7 +164,7 @@ elif main_section == "Stock Visualization" and viz_page:
     st.subheader(" Meta Info")
     st.json(get_stock_metadata(symbol))
 
-    # --- Conditional Visualization Content ---
+    # Conditional Visualization Content
     if viz_page == "Price Over Time":
         st.subheader(" Price Over Time")
         st.line_chart(data["Close"])
