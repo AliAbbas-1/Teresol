@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 st.set_page_config(layout="wide", page_title="NASDAQ Dashboard")
+
 API_BASE = "http://localhost:8000"
 
 # --- Cached API Calls ---
@@ -68,8 +69,8 @@ if main_section == "Meta Basic Analysis":
 elif main_section == "Meta Visualization":
     st.title("Meta Visualization")
     df = get_all_stocks()
-    st.subheader("Stocks per Listing Exchange")
 
+    st.subheader("Stocks per Listing Exchange")
     fig = px.bar(
         x=df["Listing Exchange"].value_counts().index,
         y=df["Listing Exchange"].value_counts().values
@@ -92,6 +93,7 @@ elif main_section == "Meta Adv. Analysis":
     st.title("Meta Advanced Analysis")
     df_meta = get_all_stocks()
     etf = get_etf_dist()
+
     st.subheader("ETF vs Non-ETF")
     st.plotly_chart(
         px.pie(
@@ -108,7 +110,7 @@ elif main_section == "Meta Adv. Analysis":
         top10 = df_meta.sort_values("Round Lot Size", ascending=False).head(10)
         st.table(top10[["Symbol", "Security Name", "Round Lot Size"]])
 
-        # Scatter plot (repeated from Visualization for clarity here)
+        # Scatter plot
         st.subheader("Scatter Plot: Round Lot Size vs Symbol")
         fig_scatter = px.scatter(top10, x="Symbol", y="Round Lot Size", size="Round Lot Size", color="Symbol")
         st.plotly_chart(fig_scatter, use_container_width=True)
@@ -121,9 +123,7 @@ elif main_section == "Meta Adv. Analysis":
 
     if not num_df.empty:
         corr = num_df.corr()
-        # Handle even single-column case by forcing a dataframe with 1x1 matrix
         if corr.shape[0] == 1 and corr.shape[1] == 1:
-            # corr is a 1x1 DataFrame with value 1.0 by definition
             fig_corr, ax = plt.subplots(figsize=(3, 3))
             sns.heatmap(corr, annot=True, cmap="coolwarm", cbar=False, square=True, ax=ax)
             ax.set_title("Correlation Matrix")
@@ -143,9 +143,10 @@ elif main_section == "Stock Price Data" and data_page:
     symbol = st.selectbox("Select Stock", df["Symbol"].sort_values(), key="price_select")
     data = get_stock_price_data(symbol)
 
-    #  Always show metadata at the top
-    st.subheader(" Meta Info")
-    st.json(get_stock_metadata(symbol))
+    # Show metadata as table
+    meta = get_stock_metadata(symbol)
+    st.subheader("Meta Info")
+    st.table(pd.DataFrame([meta]))
 
     # Conditional Subpage Content
     if data_page == "Summary Stats":
@@ -155,7 +156,6 @@ elif main_section == "Stock Price Data" and data_page:
     elif data_page == "Daily Returns":
         st.subheader("Daily Returns")
         data["Daily Return"] = data["Close"].pct_change()
-        # st.line_chart(data["Daily Return"].dropna())
         df = data["Daily Return"].dropna().reset_index()
         df.columns = ["Date", "Daily Return"]
         fig = px.line(df, x="Date", y="Daily Return", 
@@ -169,9 +169,10 @@ elif main_section == "Stock Visualization" and viz_page:
     symbol = st.selectbox("Select Stock for Visualization", df["Symbol"].sort_values(), key="viz_select")
     data = get_stock_price_data(symbol)
 
-    # Always show metadata at the top
-    st.subheader(" Meta Info")
-    st.json(get_stock_metadata(symbol))
+    # Show metadata as table
+    meta = get_stock_metadata(symbol)
+    st.subheader("Meta Info")
+    st.table(pd.DataFrame([meta]))
 
     # Conditional Visualization Content
     if viz_page == "Price Over Time":
@@ -186,23 +187,16 @@ elif main_section == "Stock Visualization" and viz_page:
         st.subheader(" Moving Averages")
         data["SMA20"] = data["Close"].rolling(20).mean()
         data["SMA50"] = data["Close"].rolling(50).mean()
-
         fig = px.line(data, y=["Close", "SMA20", "SMA50"])
-
         fig.update_layout(
             xaxis_title="",
             yaxis_title="Averages"
         )
-
         st.plotly_chart(fig, use_container_width=True)
-
 
     elif viz_page == "Volatility":
         st.subheader(" Volatility (Rolling Std Dev)")
         data["Volatility"] = data["Close"].pct_change().rolling(20).std()
-
         fig = px.line(data, y="Volatility")
         fig.update_layout(xaxis_title="")
-
         st.plotly_chart(fig, use_container_width=True)
-
