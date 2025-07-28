@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import plotly.express as px
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 st.set_page_config(layout="wide", page_title="NASDAQ Dashboard")
 API_BASE = "http://localhost:8000"
@@ -85,7 +86,7 @@ elif main_section == "Meta Visualization":
 # --- Meta Advanced Analysis ---
 elif main_section == "Meta Adv. Analysis":
     st.title("Meta Advanced Analysis")
-    df = get_all_stocks()
+    df_meta = get_all_stocks()
     etf = get_etf_dist()
     st.subheader("ETF vs Non-ETF")
     st.plotly_chart(
@@ -95,6 +96,41 @@ elif main_section == "Meta Adv. Analysis":
         ),
         use_container_width=True
     )
+
+    # Companies by lot size
+    st.subheader("Top 10 Companies by Round Lot Size")
+    if "Round Lot Size" in df_meta.columns:
+        df_meta["Round Lot Size"] = pd.to_numeric(df_meta["Round Lot Size"], errors="coerce")
+        top10 = df_meta.sort_values("Round Lot Size", ascending=False).head(10)
+        st.table(top10[["Symbol", "Security Name", "Round Lot Size"]])
+
+        # Scatter plot (repeated from Visualization for clarity here)
+        st.subheader("Scatter Plot: Round Lot Size vs Symbol")
+        fig_scatter = px.scatter(top10, x="Symbol", y="Round Lot Size", size="Round Lot Size", color="Symbol")
+        st.plotly_chart(fig_scatter, use_container_width=True)
+    else:
+        st.warning("Round Lot Size column not found in metadata.")
+
+    # Correlation matrix
+    st.subheader("Correlation Matrix (Numerical Columns)")
+    num_df = df_meta.select_dtypes(include=["float64", "int64"]).dropna(axis=1, how="any")
+
+    if not num_df.empty:
+        corr = num_df.corr()
+        # Handle even single-column case by forcing a dataframe with 1x1 matrix
+        if corr.shape[0] == 1 and corr.shape[1] == 1:
+            # corr is a 1x1 DataFrame with value 1.0 by definition
+            fig_corr, ax = plt.subplots(figsize=(3, 3))
+            sns.heatmap(corr, annot=True, cmap="coolwarm", cbar=False, square=True, ax=ax)
+            ax.set_title("Correlation Matrix")
+            st.pyplot(fig_corr)
+        else:
+            fig_corr, ax = plt.subplots(figsize=(10, 6))
+            sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax)
+            ax.set_title("Correlation Matrix")
+            st.pyplot(fig_corr)
+    else:
+        st.info("No numeric columns found for correlation matrix.")
 
 # --- Stock Price Data Subpages ---
 elif main_section == "Stock Price Data" and data_page:
