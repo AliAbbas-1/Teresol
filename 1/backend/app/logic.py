@@ -9,7 +9,16 @@ from datetime import timedelta
 df_files_list : Dict[str, pd.DataFrame] = {}
 
 def df_meta_init(df: pd.DataFrame) -> pd.DataFrame:
-    df = df[["Symbol", "Security Name", "ETF", "Listing Exchange", "Market Category", "Round Lot Size"]].copy()
+    df = df[["Symbol",
+             "Security Name",
+             "ETF",
+             "Listing Exchange",
+             "Market Category",
+             "Round Lot Size",
+             "Lot Complexity Score",
+             "Execution Time Estimate (ms)",
+             "Synthetic Friction Index"]
+            ].copy()
     df["Market Category"] = df["Market Category"].fillna("Missing")
 
     df.set_index("Symbol", inplace=True)
