@@ -234,9 +234,59 @@ if st.session_state.active_section == 'Overview':
         """.format(etf_data.get("N", 0)), unsafe_allow_html=True)
     
     # Exchange distribution table
+    st.markdown('<div class="content-card">', unsafe_allow_html=True)
     st.markdown("### 🏛️ Exchange Distribution")
     exchange_counts = df["Listing Exchange"].value_counts()
-    st.dataframe(exchange_counts, use_container_width=True)
+    
+    # Create fancy exchange distribution with progress bars and styling
+    total_stocks = exchange_counts.sum()
+    
+    for i, (exchange, count) in enumerate(exchange_counts.items()):
+        percentage = (count / total_stocks) * 100
+        
+        # Color gradient for different exchanges
+        colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe']
+        color = colors[i % len(colors)]
+        
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(90deg, {color}20 0%, {color}10 {percentage}%, transparent {percentage}%);
+            border-left: 4px solid {color};
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease;
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="margin: 0; color: #2c3e50; font-weight: 600;">{exchange}</h4>
+                    <p style="margin: 0; color: #7f8c8d; font-size: 0.9em;">Market Exchange</p>
+                </div>
+                <div style="text-align: right;">
+                    <h3 style="margin: 0; color: {color}; font-weight: 700;">{count:,}</h3>
+                    <p style="margin: 0; color: #7f8c8d; font-size: 0.8em;">{percentage:.1f}% of total</p>
+                </div>
+            </div>
+            <div style="
+                width: 100%; 
+                height: 6px; 
+                background: rgba(0,0,0,0.1); 
+                border-radius: 3px; 
+                margin-top: 10px;
+                overflow: hidden;
+            ">
+                <div style="
+                    width: {percentage}%; 
+                    height: 100%; 
+                    background: linear-gradient(90deg, {color}, {color}dd);
+                    border-radius: 3px;
+                    transition: width 0.8s ease;
+                "></div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     st.markdown('</div>', unsafe_allow_html=True)
 
 # --- MARKET ANALYSIS SECTION ---
@@ -255,7 +305,7 @@ elif st.session_state.active_section == 'Market Analysis':
             color=df["Listing Exchange"].value_counts().values,
             color_continuous_scale="Viridis"
         )
-        fig.update_layout(
+        fig.update_layout(  
             xaxis_title="Listing Exchange",
             yaxis_title="Number of Stocks",
             showlegend=False,
