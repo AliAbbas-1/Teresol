@@ -84,8 +84,24 @@ elif main_section == "Meta Visualization":
 
     st.subheader("Market Category Distribution")
     cat = get_categories_dist()
+    
+    descriptive_categories = {}
+    for key, value in cat.items():
+        if key == 'Q':
+            descriptive_categories['Global Select Market'] = value
+        elif key == 'G':
+            descriptive_categories['Global Market'] = value
+        elif key == 'S':
+            descriptive_categories['Capital Market'] = value
+        elif key == 'Missing':
+            descriptive_categories['Missing Data'] = value # or just 'Missing'
+        else:
+            descriptive_categories[key] = value # Handle any unexpected keys gracefully
+
     st.plotly_chart(
-        px.pie(names=cat.keys(), values=cat.values(), title="Market Categories"),
+        px.pie(names=list(descriptive_categories.keys()),
+            values=list(descriptive_categories.values()),
+            title="NASDAQ Market Categories"),
         use_container_width=True
     )
 
