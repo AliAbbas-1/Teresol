@@ -52,18 +52,25 @@ def get_stocks_symbol(symbol: str):
     
 @router.get("/stocks/{symbol}/data")
 @safe_symbol_access
-def get_stocks_symbol_data(symbol: str):
+def get_stocks_symbol_data(symbol: str, start: str = None, end: str = None):
     symbol = symbol.upper()
 
     df = get_file_data(symbol).copy()
-
     df["Date"] = df.index
 
+    # Filter by date if provided
+    if start:
+        df = df[df.index >= pd.to_datetime(start)]
+    if end:
+        df = df[df.index <= pd.to_datetime(end)]
+
+    # Reorder columns
     cols = df.columns.tolist()
     cols = ["Date"] + [col for col in cols if col != "Date"]    
     df = df[cols]
 
     return df.to_dict(orient="records")
+
     
 @router.get("/stocks/{symbol}/data/{date}")
 @safe_symbol_access
