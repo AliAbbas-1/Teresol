@@ -41,7 +41,8 @@ main_section = st.sidebar.radio("Select Section", [
     "Meta Visualization",
     "Meta Adv. Analysis",
     "Stock Price Data",
-    "Stock Visualization"
+    "Stock Visualization",
+    "Upload File"
 ])
 
 # --- Sub-section selections ---
@@ -200,3 +201,70 @@ elif main_section == "Stock Visualization" and viz_page:
         fig = px.line(data, y="Volatility")
         fig.update_layout(xaxis_title="")
         st.plotly_chart(fig, use_container_width=True)
+
+elif main_section == "Upload File":
+    st.title("File Upload")
+    uploaded_file = st.file_uploader("Choose a file", type=["csv", "txt"])
+    if uploaded_file is not None:
+        st.write("Filename:", uploaded_file.name)
+
+        if st.button("Upload"):
+            files = {"file": (uploaded_file.name, uploaded_file, uploaded_file.type)}
+            try:
+                response = requests.post("http://localhost:8000/upload", files=files)
+                json_data = response.json()
+
+                meta = json_data["metadata"]
+                st.subheader("Meta Info")
+                st.table(pd.DataFrame([meta]))
+
+                # Initial data processing
+                # Create a copy to avoid modifying the original data dictionary if it were used elsewhere
+                processed_data = pd.DataFrame(json_data["data"])
+                processed_data["Date"] = pd.to_datetime(processed_data["Date"])
+                processed_data.set_index("Date", inplace=True)
+                processed_data = processed_data.sort_index()
+
+                st.subheader("Summary Statistics")
+                st.write(processed_data.describe())
+
+                st.subheader("Daily Returns")
+                # Calculate daily returns on a copy of the 'Close' column to avoid modifying 'processed_data'
+                daily_returns_df = processed_data["Close"].pct_change().dropna().reset_index()
+                daily_returns_df.columns = ["Date", "Daily Return"]
+                fig_daily_returns = px.line(daily_returns_df, x="Date", y="Daily Return",
+                                            labels={"Date": "", "Daily Return": "Daily Return"})
+                st.plotly_chart(fig_daily_returns, use_container_width=True)
+
+                st.subheader("Price Over Time")
+                # Extract 'Close' prices for plotting without modifying 'processed_data'
+                price_over_time_df = processed_data["Close"].dropna().reset_index()
+                price_over_time_df.columns = ["Date", "Close"]
+                fig_price_over_time = px.line(price_over_time_df, x="Date", y="Close",
+                                            labels={"Date": "", "Close": "Close"})
+                st.plotly_chart(fig_price_over_time, use_container_width=True)
+
+                st.subheader("Moving Averages")
+                # Calculate moving averages directly on 'processed_data' as new columns
+                # This is acceptable as these are new derived columns for a specific plot
+                processed_data["SMA20"] = processed_data["Close"].rolling(20).mean()
+                processed_data["SMA50"] = processed_data["Close"].rolling(50).mean()
+                fig_moving_averages = px.line(processed_data, y=["Close", "SMA20", "SMA50"])
+                fig_moving_averages.update_layout(
+                    xaxis_title="",
+                    yaxis_title="Averages"
+                )
+                st.plotly_chart(fig_moving_averages, use_container_width=True)
+
+                st.subheader("Volatility (Rolling Std Dev)")
+                # Calculate volatility directly on 'processed_data' as a new column
+                processed_data["Volatility"] = processed_data["Close"].pct_change().rolling(20).std()
+                fig_volatility = px.line(processed_data, y="Volatility")
+                fig_volatility.update_layout(xaxis_title="")
+                st.plotly_chart(fig_volatility, use_container_width=True)
+
+
+                # here goes: price over time, moving avg, volatility
+                
+            except Exception as e:
+                st.error(f"Failure: {response.text}")

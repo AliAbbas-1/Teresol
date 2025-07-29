@@ -6,7 +6,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from datetime import timedelta
 
-
 df_files_list : Dict[str, pd.DataFrame] = {}
 
 def df_meta_init(df: pd.DataFrame) -> pd.DataFrame:
@@ -62,11 +61,6 @@ def get_calculation_data(df: pd.DataFrame) -> dict:
         "Sharpe Ratio": sharpe,
         "Value At Risk 95%": var_95
     }
-
-
-def set_df_file(df_new: pd.DataFrame):
-    global df_file
-    df_file = df_file_init(df_new)
 
 def train_and_predict(df: pd.DataFrame) -> dict:
     df = df.copy()

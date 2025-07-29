@@ -1,9 +1,10 @@
+from io import StringIO
 from datetime import datetime
 from functools import wraps
-from fastapi import APIRouter
+from fastapi import APIRouter, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse, RedirectResponse
-from app.logic import get_meta_info, get_calculation_data, get_file_data
-from app.logic import train_and_predict
+from app.logic import get_meta_info, get_calculation_data, get_file_data, df_file_init
+import pandas as pd
 
 router = APIRouter()
 
@@ -83,12 +84,6 @@ def get_stocks_symbol_analytics(symbol: str):
 
     return get_calculation_data(get_file_data(symbol))
 
-@router.get("/stocks/{symbol}/predict")
-def predict_stock_price(symbol: str):
-    df = get_file_data(symbol).copy()
-    df['Date'] = df.index
-    return train_and_predict(df)
-
 @router.get("/distribution/etf")
 def get_distribution_etf():
     df = get_meta_info()
@@ -104,3 +99,30 @@ def get_distribution_exchanges():
 def get_distribution_categories():
     df = get_meta_info()
     return df["Market Category"].value_counts().to_dict()
+
+@router.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        content = await file.read()
+        decoded = content.decode("utf-8")
+        symbol = file.filename.removesuffix(".csv")
+        df = pd.read_csv(StringIO(decoded))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to read CSV: {str(e)}")
+
+    columns = df.columns.to_list()
+    required = ["Date", "Open" , "High", "Low", "Close", "Adj Close", "Volume"]
+
+    df_meta = get_meta_info()
+
+    if set(columns) == set(required) and symbol in df_meta.index:
+        return {
+            "metadata": df_meta.loc[symbol].to_dict(),
+            "analytics": get_calculation_data(df_file_init(df.copy())),
+            "data": df.to_dict(orient="records")
+        }
+
+    else:
+        raise HTTPException(status_code=400, detail=f"Failed to read CSV: Invalid columns")
+
+    # return: meta, analytics, data
