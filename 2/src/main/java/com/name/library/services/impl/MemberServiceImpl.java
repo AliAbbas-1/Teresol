@@ -16,7 +16,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 public class MemberServiceImpl implements MemberService {
 
     private final Map<String, MemberDto> members = new ConcurrentHashMap<>();
-
+ 
     @Override
     public List<MemberDto> getAllMembers() {
         return new ArrayList<>(members.values());
