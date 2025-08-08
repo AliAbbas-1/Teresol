@@ -8,6 +8,7 @@ import com.name.library.services.BookService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,19 +21,25 @@ public class BookController {
     BookService bookService;
 
     @GET
-    public List<BookResponseDTO> getAllBooks() {
-        return bookService.getAllBooks();
+    public Response getAllBooks() {
+        List<BookResponseDTO> books = bookService.getAllBooks();
+        if (books.isEmpty()) {
+            return Response.noContent().build();  // 204 No Content
+        }
+        return Response.ok(books).build();
     }
 
     @GET
     @Path("/{id}")
-    public BookResponseDTO getBook(UUID id) {
-        return bookService.getBook(id);
+    public Response getBook(UUID id) {
+        return Response.ok(bookService.getBook(id)).build();
     }
 
     @POST
-    public void addBook(BookCreateRequestDTO newBook) {
+    public Response addBook(BookCreateRequestDTO newBook) {
         bookService.addBook(newBook);
+
+        return Response.ok().build();
     }
 
     @PUT

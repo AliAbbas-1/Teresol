@@ -2,6 +2,9 @@ package com.name.library.services;
 
 import com.name.library.dtos.LendingResponseDTO;
 import com.name.library.dtos.LendingReturnDTO;
+import com.name.library.exceptions.AlreadyLentException;
+import com.name.library.exceptions.BookNotFoundException;
+import com.name.library.exceptions.MemberNotFoundException;
 import com.name.library.models.BookModel;
 import com.name.library.models.LendingModel;
 import com.name.library.models.MemberModel;
@@ -41,17 +44,17 @@ public class LendingService {
 
     public void lendBook(UUID bookId, UUID memberId) {
         BookModel bookModel = bookRepository.getBook(bookId)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new BookNotFoundException(
                         "Book not found with ID: " + bookId
                 ));
 
         MemberModel memberModel = memberRepository.getMember(memberId)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new MemberNotFoundException(
                         "Member not found with ID: " + memberId
                 ));
 
         if (!bookModel.available) {
-            throw new RuntimeException(
+            throw new AlreadyLentException(
                     "Book with ID " + bookId + " is already lent"
             );
         }
@@ -79,12 +82,12 @@ public class LendingService {
         lendingModel.returnDate = new Date();
 
         BookModel bookModel = bookRepository.getBook(lendingModel.bookId)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new BookNotFoundException(
                         "Book not found with ID: " + lendingModel.bookId
                 ));
 
         MemberModel memberModel = memberRepository.getMember(lendingModel.memberId)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new MemberNotFoundException(
                         "Member not found with ID: " + lendingModel.memberId
                 ));
 

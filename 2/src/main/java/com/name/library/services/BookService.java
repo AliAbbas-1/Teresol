@@ -3,12 +3,14 @@ package com.name.library.services;
 import com.name.library.dtos.BookCreateRequestDTO;
 import com.name.library.dtos.BookResponseDTO;
 import com.name.library.dtos.BookUpdateRequestDTO;
+import com.name.library.exceptions.BookNotFoundException;
 import com.name.library.models.BookModel;
 import com.name.library.repositories.BookRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.awt.print.Book;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +30,7 @@ public class BookService {
                         bookModel.publicationDate,
                         bookModel.available
                 ))
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new BookNotFoundException(
                         "Book not found with ID: " + bookId
                 ));
     }
@@ -74,7 +76,7 @@ public class BookService {
 
             bookModel.updatedAt = new Date();
         }, () -> {
-            throw new RuntimeException(
+            throw new BookNotFoundException(
                     "Book not found with ID: " + bookId
             );
         });
@@ -82,7 +84,7 @@ public class BookService {
 
     public void deleteBook(UUID bookId) {
         if (!bookRepository.deleteBook(bookId)) {
-            throw new RuntimeException(
+            throw new BookNotFoundException(
                     "Book not found with ID: " + bookId
             );
         }
