@@ -11,7 +11,7 @@ import java.util.Map;
 public class BookNotFoundExceptionMapper implements ExceptionMapper<BookNotFoundException> {
     @Override
     public Response toResponse(BookNotFoundException e) {
-        return Response.status(Response.Status.CONFLICT)
+        return Response.status(Response.Status.NOT_FOUND)
                 .entity(Map.of("error", e.getMessage()))
                 .build();
     }
