@@ -1,31 +1,32 @@
 package com.name.library.repositories;
 
-import com.name.library.models.Book;
+import com.name.library.models.BookModel;
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
 public class BookRepository {
-    List<Book> books;
+    List<BookModel> bookModels = new ArrayList<>();
 
-    public Optional<Book> getBook(UUID targetId) {
-        return books.stream()
-                .filter(book -> book.id.equals(targetId))
+    public Optional<BookModel> getBook(UUID bookId) {
+        return bookModels.stream()
+                .filter(bookModel -> bookModel.id.equals(bookId))
                 .findFirst();
     }
 
-    public List<Book> getAllBooks() {
-        return books;
+    public List<BookModel> getAllBooks() {
+        return bookModels;
     }
 
-    public void addBook(Book newBook) {
-        books.add(newBook);
+    public void addBook(BookModel newBookModel) {
+        bookModels.add(newBookModel);
     }
 
-    public boolean deleteBook(UUID targetId) {
-        return books.removeIf(book -> book.id == targetId);
+    public boolean deleteBook(UUID bookId) {
+        return bookModels.removeIf(bookModel -> bookModel.id.equals(bookId));
     }
 }

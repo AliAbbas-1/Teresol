@@ -3,21 +3,21 @@ package com.name.library.models;
 import java.util.Date;
 import java.util.UUID;
 
-public class Book {
+public class BookModel {
     public UUID id;
     public String isbn;
     public String title;
     public String author;
     public Date publicationDate;
-    public boolean available;
-    public String lentTo;
     public Date createdAt;
     public Date updatedAt;
+    public boolean available;
+    public String lentTo;
 
-    public Book(String isbn,
-                String title,
-                String author,
-                Date publicationDate
+    public BookModel(String isbn,
+                     String title,
+                     String author,
+                     Date publicationDate
     ) {
         this.id = UUID.randomUUID();
 
@@ -26,9 +26,10 @@ public class Book {
         this.author = author;
         this.publicationDate = publicationDate;
 
-        this.available = true; // new books are always available
-        this.lentTo = null; // new books have no borrower
         this.createdAt = new Date();
         this.updatedAt = this.createdAt; // problem??
+
+        this.available = true; // new books are always available
+        this.lentTo = null; // new books have no borrower
     }
 }

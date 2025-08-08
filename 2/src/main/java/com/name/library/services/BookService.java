@@ -1,9 +1,9 @@
 package com.name.library.services;
 
-import com.name.library.dtos.BookCreateRequest;
-import com.name.library.dtos.BookResponse;
-import com.name.library.dtos.BookUpdateRequest;
-import com.name.library.models.Book;
+import com.name.library.dtos.BookCreateRequestDTO;
+import com.name.library.dtos.BookResponseDTO;
+import com.name.library.dtos.BookUpdateRequestDTO;
+import com.name.library.models.BookModel;
 import com.name.library.repositories.BookRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -19,71 +19,71 @@ public class BookService {
     @Inject
     BookRepository bookRepository;
 
-    public BookResponse getBook(UUID targetId) {
-        return bookRepository.getBook(targetId)
-                .map(book -> new BookResponse(
-                        book.id,
-                        book.title,
-                        book.author,
-                        book.publicationDate,
-                        book.available
+    public BookResponseDTO getBook(UUID bookId) {
+        return bookRepository.getBook(bookId)
+                .map(bookModel -> new BookResponseDTO(
+                        bookModel.id,
+                        bookModel.title,
+                        bookModel.author,
+                        bookModel.publicationDate,
+                        bookModel.available
                 ))
                 .orElseThrow(() -> new RuntimeException(
-                        "Book not found with ID: " + targetId
+                        "Book not found with ID: " + bookId
                 ));
     }
 
-    public List<BookResponse> getAllBooks() {
+    public List<BookResponseDTO> getAllBooks() {
         return bookRepository.getAllBooks().stream()
-                .map(book -> new BookResponse(
-                        book.id,
-                        book.title,
-                        book.author,
-                        book.publicationDate,
-                        book.available
+                .map(bookModel -> new BookResponseDTO(
+                        bookModel.id,
+                        bookModel.title,
+                        bookModel.author,
+                        bookModel.publicationDate,
+                        bookModel.available
                 ))
                 .collect(Collectors.toList());
     }
 
-    public void addBook(BookCreateRequest newBook) {
-        bookRepository.addBook(new Book(
-                newBook.isbn,
-                newBook.title,
-                newBook.author,
-                newBook.publicationDate
+    public void addBook(BookCreateRequestDTO newBook) {
+        bookRepository.addBook(new BookModel(
+                newBook.isbn(),
+                newBook.title(),
+                newBook.author(),
+                newBook.publicationDate()
         ));
     }
 
-    public void updateBook(UUID targetId, BookUpdateRequest updatedBook) {
-        bookRepository.getBook(targetId).ifPresentOrElse(book -> {
-            if (updatedBook.isbn != null) {
-                book.isbn = updatedBook.isbn;
+    public void updateBook(UUID bookId, BookUpdateRequestDTO updatedBook) {
+        bookRepository.getBook(bookId).ifPresentOrElse(bookModel -> {
+            if (updatedBook.isbn() != null) {
+                bookModel.isbn = updatedBook.isbn();
             }
 
-            if (updatedBook.title != null) {
-                book.title = updatedBook.title;
+            if (updatedBook.title() != null) {
+                bookModel.title = updatedBook.title();
             }
 
-            if (updatedBook.author != null) {
-                book.author = updatedBook.author;
+            if (updatedBook.author() != null) {
+                bookModel.author = updatedBook.author();
             }
 
-            if (updatedBook.publicationDate != null) {
-                book.publicationDate = updatedBook.publicationDate;
+            if (updatedBook.publicationDate() != null) {
+                bookModel.publicationDate = updatedBook.publicationDate();
             }
 
-            book.updatedAt = new Date();
+            bookModel.updatedAt = new Date();
         }, () -> {
             throw new RuntimeException(
-                    "Book not found with ID: " + targetId
+                    "Book not found with ID: " + bookId
             );
         });
     }
 
-    public void deleteBook(UUID targetId) {
-        if (!bookRepository.deleteBook(targetId)) {
+    public void deleteBook(UUID bookId) {
+        if (!bookRepository.deleteBook(bookId)) {
             throw new RuntimeException(
-                    "Book not found with ID: " + targetId
+                    "Book not found with ID: " + bookId
             );
         }
     }

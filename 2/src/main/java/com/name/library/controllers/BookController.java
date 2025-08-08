@@ -1,8 +1,8 @@
 package com.name.library.controllers;
 
-import com.name.library.dtos.BookCreateRequest;
-import com.name.library.dtos.BookResponse;
-import com.name.library.dtos.BookUpdateRequest;
+import com.name.library.dtos.BookCreateRequestDTO;
+import com.name.library.dtos.BookResponseDTO;
+import com.name.library.dtos.BookUpdateRequestDTO;
 import com.name.library.services.BookService;
 
 import jakarta.inject.Inject;
@@ -20,29 +20,29 @@ public class BookController {
     BookService bookService;
 
     @GET
-    public List<BookResponse> getAllBooks() {
+    public List<BookResponseDTO> getAllBooks() {
         return bookService.getAllBooks();
     }
 
     @GET
     @Path("/{id}")
-    public BookResponse getBook(UUID id) {
+    public BookResponseDTO getBook(UUID id) {
         return bookService.getBook(id);
     }
 
     @POST
-    public void addBook(BookCreateRequest newBook) {
+    public void addBook(BookCreateRequestDTO newBook) {
         bookService.addBook(newBook);
     }
 
     @PUT
     @Path("/{id}")
-    public void updateBook(UUID id, BookUpdateRequest updatedBook) {
+    public void updateBook(UUID id, BookUpdateRequestDTO updatedBook) {
         bookService.updateBook(id, updatedBook);
     }
 
     @DELETE
-    @Path("/id")
+    @Path("/{id}")
     public void deleteBook(UUID id) {
         bookService.deleteBook(id);
     }
