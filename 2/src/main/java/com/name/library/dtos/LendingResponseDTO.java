@@ -1,14 +1,16 @@
 package com.name.library.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.annotation.Nullable;
 
-import java.util.Date;
-import java.util.UUID;
+import java.time.Instant;
 
-public record LendingResponseDTO (
-        UUID lendingId,
-        UUID bookId,
-        UUID memberId,
-        Date lendingDate,
-        @Nullable Date returnDate
-) {}
+public record LendingResponseDTO(
+    String lendingId,
+    String bookId,
+    String memberId,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
+        Instant lendingDate,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
+        @Nullable
+        Instant returnDate) {}

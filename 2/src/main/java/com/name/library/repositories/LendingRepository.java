@@ -6,14 +6,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @ApplicationScoped
 public class LendingRepository {
 
   List<LendingModel> lendingModels = new ArrayList<>();
 
-  public Optional<LendingModel> getLendingModel(UUID lendingId) {
+  public Optional<LendingModel> getLendingModel(String lendingId) {
     return lendingModels.stream()
         .filter(lendingModel -> lendingModel.lendingId.equals(lendingId))
         .findFirst();

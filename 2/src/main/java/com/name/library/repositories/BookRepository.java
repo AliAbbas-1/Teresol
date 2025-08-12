@@ -6,14 +6,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @ApplicationScoped
 public class BookRepository {
 
   List<BookModel> bookModels = new ArrayList<>();
 
-  public Optional<BookModel> getBook(UUID bookId) {
+  public Optional<BookModel> getBook(String bookId) {
     return bookModels.stream().filter(bookModel -> bookModel.id.equals(bookId)).findFirst();
   }
 
@@ -21,11 +20,12 @@ public class BookRepository {
     return bookModels;
   }
 
-  public void addBook(BookModel newBookModel) {
+  public BookModel addBook(BookModel newBookModel) {
     bookModels.add(newBookModel);
+    return newBookModel;
   }
 
-  public boolean deleteBook(UUID bookId) {
+  public boolean deleteBook(String bookId) {
     return bookModels.removeIf(bookModel -> bookModel.id.equals(bookId));
   }
 }

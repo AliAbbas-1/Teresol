@@ -1,27 +1,28 @@
 package com.name.library.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 public class MemberModel {
 
-  public UUID id;
+  public String id;
   public String name;
   public String email;
-  public String password; // this is here for no reason
-  public List<UUID> borrowedBookModels;
-  public Date joinedAt;
+  public List<String> borrowedBookModels;
 
-  public MemberModel(String name, String email, String password) {
-    this.id = UUID.randomUUID();
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
+  public Instant joinedAt;
+
+  public MemberModel(String name, String email) {
+    this.id = IdModel.generate(IdModel.Type.MEMB);
 
     this.name = name;
     this.email = email;
-    this.password = password;
 
     this.borrowedBookModels = new ArrayList<>();
-    this.joinedAt = new Date();
+    this.joinedAt = Instant.now();
   }
 }

@@ -1,7 +1,5 @@
 package com.name.library.dtos;
 
-import java.util.UUID;
+import jakarta.validation.constraints.NotBlank;
 
-public record LendingReturnDTO (
-    UUID lendingId
-) {}
+public record LendingReturnDTO(@NotBlank String lendingId) {}

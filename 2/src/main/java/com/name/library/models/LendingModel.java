@@ -1,24 +1,29 @@
 package com.name.library.models;
 
-import java.util.Date;
-import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.time.Instant;
 
 public class LendingModel {
 
-  public UUID lendingId;
-  public UUID bookId;
-  public UUID memberId;
-  public Date lendingDate;
-  public Date returnDate;
+  public String lendingId;
+  public String bookId;
+  public String memberId;
 
-  public LendingModel(UUID bookId, UUID memberId) {
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
+  public Instant lendingDate;
+
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
+  public Instant returnDate;
+
+  public LendingModel(String bookId, String memberId) {
     // creating this object means a book has been lent
-    this.lendingId = UUID.randomUUID();
+    this.lendingId = IdModel.generate(IdModel.Type.LEND);
 
     this.bookId = bookId;
     this.memberId = memberId;
 
-    this.lendingDate = new Date();
+    this.lendingDate = Instant.now();
     this.returnDate = null;
     // returnDate set when book is returned
   }

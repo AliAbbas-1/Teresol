@@ -1,5 +1,6 @@
 package com.name.library.services;
 
+import com.name.library.dtos.LendingRequestDTO;
 import com.name.library.dtos.LendingResponseDTO;
 import com.name.library.dtos.LendingReturnDTO;
 import com.name.library.exceptions.*;
@@ -12,9 +13,8 @@ import com.name.library.repositories.MemberRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -39,7 +39,10 @@ public class LendingService {
         .collect(Collectors.toList());
   }
 
-  public void lendBook(UUID bookId, UUID memberId) {
+  public void lendBook(LendingRequestDTO lendingRequestDTO) {
+    String bookId = lendingRequestDTO.bookId();
+    String memberId = lendingRequestDTO.memberId();
+
     BookModel bookModel =
         bookRepository
             .getBook(bookId)
@@ -62,7 +65,7 @@ public class LendingService {
   }
 
   public void returnBook(LendingReturnDTO lendingReturnDTO) {
-    UUID lendingId = lendingReturnDTO.lendingId();
+    String lendingId = lendingReturnDTO.lendingId();
 
     LendingModel lendingModel =
         lendingRepository
@@ -75,7 +78,7 @@ public class LendingService {
           "Lending Log of ID: " + lendingId + " has already been resolved");
     }
 
-    lendingModel.returnDate = new Date();
+    lendingModel.returnDate = Instant.now();
 
     BookModel bookModel =
         bookRepository

@@ -1,10 +1,6 @@
 package com.name.library.dtos;
 
-import java.util.Date;
+import jakarta.validation.constraints.NotBlank;
 
 public record BookCreateRequestDTO(
-        String isbn,
-        String title,
-        String author,
-        Date publicationDate
-) {}
+    @NotBlank String isbn, @NotBlank String title, @NotBlank String author) {}
