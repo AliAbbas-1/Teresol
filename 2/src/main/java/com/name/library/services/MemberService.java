@@ -12,24 +12,19 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class MemberService {
-    @Inject
-    MemberRepository memberRepository;
 
-    public List<MemberResponseDTO> getAllMembers() {
-        return memberRepository.getAllMembers().stream()
-                .map(memberModel -> new MemberResponseDTO(
-                        memberModel.id,
-                        memberModel.name,
-                        memberModel.email
-                ))
-                .collect(Collectors.toList());
-    }
+  @Inject MemberRepository memberRepository;
 
-    public void addMember(MemberCreateRequestDTO newMember) {
-        memberRepository.addMember(new MemberModel(
-                newMember.name(),
-                newMember.email(),
-                newMember.password()
-        ));
-    }
+  public List<MemberResponseDTO> getAllMembers() {
+    return memberRepository.getAllMembers().stream()
+        .map(
+            memberModel ->
+                new MemberResponseDTO(memberModel.id, memberModel.name, memberModel.email))
+        .collect(Collectors.toList());
+  }
+
+  public void addMember(MemberCreateRequestDTO newMember) {
+    memberRepository.addMember(
+        new MemberModel(newMember.name(), newMember.email(), newMember.password()));
+  }
 }

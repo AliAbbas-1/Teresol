@@ -4,9 +4,6 @@ import jakarta.annotation.Nullable;
 
 import java.util.Date;
 
+@Nullable
 public record BookUpdateRequestDTO(
-        @Nullable String isbn,
-        @Nullable String title,
-        @Nullable String author,
-        @Nullable Date publicationDate
-) {}
+    String isbn, String title, String author, Date publicationDate) {}

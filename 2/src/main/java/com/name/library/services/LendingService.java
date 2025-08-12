@@ -2,9 +2,7 @@ package com.name.library.services;
 
 import com.name.library.dtos.LendingResponseDTO;
 import com.name.library.dtos.LendingReturnDTO;
-import com.name.library.exceptions.AlreadyLentException;
-import com.name.library.exceptions.BookNotFoundException;
-import com.name.library.exceptions.MemberNotFoundException;
+import com.name.library.exceptions.*;
 import com.name.library.models.BookModel;
 import com.name.library.models.LendingModel;
 import com.name.library.models.MemberModel;
@@ -21,80 +19,80 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class LendingService {
-    @Inject
-    LendingRepository lendingRepository;
 
-    @Inject
-    BookRepository bookRepository;
+  @Inject LendingRepository lendingRepository;
 
-    @Inject
-    MemberRepository memberRepository;
+  @Inject BookRepository bookRepository;
 
-    public List<LendingResponseDTO> getLendingHistory() {
-        return lendingRepository.getAllLendingModels().stream()
-                .map(lendingModel -> new LendingResponseDTO(
-                        lendingModel.lendingId,
-                        lendingModel.bookId,
-                        lendingModel.memberId,
-                        lendingModel.lendingDate,
-                        lendingModel.returnDate
-                ))
-                .collect(Collectors.toList());
+  @Inject MemberRepository memberRepository;
+
+  public List<LendingResponseDTO> getLendingHistory() {
+    return lendingRepository.getAllLendingModels().stream()
+        .map(
+            lendingModel ->
+                new LendingResponseDTO(
+                    lendingModel.lendingId,
+                    lendingModel.bookId,
+                    lendingModel.memberId,
+                    lendingModel.lendingDate,
+                    lendingModel.returnDate))
+        .collect(Collectors.toList());
+  }
+
+  public void lendBook(UUID bookId, UUID memberId) {
+    BookModel bookModel =
+        bookRepository
+            .getBook(bookId)
+            .orElseThrow(() -> new BookNotFoundException("Book not found with ID: " + bookId));
+
+    MemberModel memberModel =
+        memberRepository
+            .getMember(memberId)
+            .orElseThrow(
+                () -> new MemberNotFoundException("Member not found with ID: " + memberId));
+
+    if (!bookModel.available) {
+      throw new AlreadyLentException("Book with ID " + bookId + " is already lent");
     }
 
-    public void lendBook(UUID bookId, UUID memberId) {
-        BookModel bookModel = bookRepository.getBook(bookId)
-                .orElseThrow(() -> new BookNotFoundException(
-                        "Book not found with ID: " + bookId
-                ));
+    memberModel.borrowedBookModels.add(bookId);
+    bookModel.available = false;
 
-        MemberModel memberModel = memberRepository.getMember(memberId)
-                .orElseThrow(() -> new MemberNotFoundException(
-                        "Member not found with ID: " + memberId
-                ));
+    lendingRepository.addLendingModel(new LendingModel(bookId, memberId));
+  }
 
-        if (!bookModel.available) {
-            throw new AlreadyLentException(
-                    "Book with ID " + bookId + " is already lent"
-            );
-        }
+  public void returnBook(LendingReturnDTO lendingReturnDTO) {
+    UUID lendingId = lendingReturnDTO.lendingId();
 
-        memberModel.borrowedBookModels.add(bookId);
-        bookModel.available = false;
+    LendingModel lendingModel =
+        lendingRepository
+            .getLendingModel(lendingId)
+            .orElseThrow(
+                () -> new LendingNotFoundException("Lending Log not found with ID: " + lendingId));
 
-        lendingRepository.addLendingModel(new LendingModel(bookId, memberId));
+    if (lendingModel.returnDate != null) {
+      throw new AlreadyReturnedException(
+          "Lending Log of ID: " + lendingId + " has already been resolved");
     }
 
-    public void returnBook(LendingReturnDTO lendingReturnDTO) {
-        UUID lendingId = lendingReturnDTO.lendingId();
+    lendingModel.returnDate = new Date();
 
-        LendingModel lendingModel = lendingRepository.getLendingModel(lendingId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Lending Log not found with ID: " + lendingId
-                ));
+    BookModel bookModel =
+        bookRepository
+            .getBook(lendingModel.bookId)
+            .orElseThrow(
+                () -> new BookNotFoundException("Book not found with ID: " + lendingModel.bookId));
 
-        if (lendingModel.returnDate != null) {
-            throw new RuntimeException(
-                    "Lending Log of ID: " + lendingId + " has already been resolved"
-            );
-        }
+    MemberModel memberModel =
+        memberRepository
+            .getMember(lendingModel.memberId)
+            .orElseThrow(
+                () ->
+                    new MemberNotFoundException(
+                        "Member not found with ID: " + lendingModel.memberId));
 
-        lendingModel.returnDate = new Date();
+    memberModel.borrowedBookModels.removeIf(bookId -> bookId.equals(lendingModel.bookId));
 
-        BookModel bookModel = bookRepository.getBook(lendingModel.bookId)
-                .orElseThrow(() -> new BookNotFoundException(
-                        "Book not found with ID: " + lendingModel.bookId
-                ));
-
-        MemberModel memberModel = memberRepository.getMember(lendingModel.memberId)
-                .orElseThrow(() -> new MemberNotFoundException(
-                        "Member not found with ID: " + lendingModel.memberId
-                ));
-
-        memberModel.borrowedBookModels.removeIf(
-                bookId -> bookId.equals(lendingModel.bookId)
-        );
-
-        bookModel.available = true;
-    }
+    bookModel.available = true;
+  }
 }

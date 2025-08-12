@@ -10,23 +10,22 @@ import java.util.UUID;
 
 @ApplicationScoped
 public class BookRepository {
-    List<BookModel> bookModels = new ArrayList<>();
 
-    public Optional<BookModel> getBook(UUID bookId) {
-        return bookModels.stream()
-                .filter(bookModel -> bookModel.id.equals(bookId))
-                .findFirst();
-    }
+  List<BookModel> bookModels = new ArrayList<>();
 
-    public List<BookModel> getAllBooks() {
-        return bookModels;
-    }
+  public Optional<BookModel> getBook(UUID bookId) {
+    return bookModels.stream().filter(bookModel -> bookModel.id.equals(bookId)).findFirst();
+  }
 
-    public void addBook(BookModel newBookModel) {
-        bookModels.add(newBookModel);
-    }
+  public List<BookModel> getAllBooks() {
+    return bookModels;
+  }
 
-    public boolean deleteBook(UUID bookId) {
-        return bookModels.removeIf(bookModel -> bookModel.id.equals(bookId));
-    }
+  public void addBook(BookModel newBookModel) {
+    bookModels.add(newBookModel);
+  }
+
+  public boolean deleteBook(UUID bookId) {
+    return bookModels.removeIf(bookModel -> bookModel.id.equals(bookId));
+  }
 }

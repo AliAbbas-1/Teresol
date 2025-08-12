@@ -10,19 +10,20 @@ import java.util.UUID;
 
 @ApplicationScoped
 public class LendingRepository {
-    List<LendingModel> lendingModels = new ArrayList<>();
 
-    public Optional<LendingModel> getLendingModel(UUID lendingId) {
-        return lendingModels.stream()
-                .filter(lendingModel -> lendingModel.lendingId.equals(lendingId))
-                .findFirst();
-    }
+  List<LendingModel> lendingModels = new ArrayList<>();
 
-    public List<LendingModel> getAllLendingModels() {
-        return lendingModels;
-    }
+  public Optional<LendingModel> getLendingModel(UUID lendingId) {
+    return lendingModels.stream()
+        .filter(lendingModel -> lendingModel.lendingId.equals(lendingId))
+        .findFirst();
+  }
 
-    public void addLendingModel(LendingModel lendingModel) {
-        lendingModels.add(lendingModel);
-    }
+  public List<LendingModel> getAllLendingModels() {
+    return lendingModels;
+  }
+
+  public void addLendingModel(LendingModel lendingModel) {
+    lendingModels.add(lendingModel);
+  }
 }
