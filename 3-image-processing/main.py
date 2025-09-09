@@ -15,4 +15,5 @@ cv2.destroyAllWindows()
 
 # Extract text using OCR
 text = pytesseract.image_to_string(image)
++
 print("Extracted Text:", text)
